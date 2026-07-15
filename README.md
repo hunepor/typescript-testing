@@ -41,6 +41,31 @@ npm run test:ui:apple
 npm run containers:apple:stop:ui
 ```
 
+## Appium iOS Safari
+
+Mobile browser tests use Appium with the XCUITest driver and an iOS Simulator. Start Juice Shop first, start Appium in another terminal, then run the mobile suite:
+
+```bash
+npm run containers:apple:start:ui
+npm run appium:driver:install:xcuitest
+npm run appium:server
+npm run test:mobile:ios
+```
+
+Xcode must have the iOS platform installed for the active Xcode version. If WebDriverAgent fails with `iOS <version> is not installed`, open Xcode > Settings > Components and install the missing iOS platform.
+
+Useful environment overrides:
+
+```text
+MOBILE_APP_URL=http://127.0.0.1:3000
+APPIUM_HOST=127.0.0.1
+APPIUM_PORT=4723
+IOS_DEVICE_NAME=iPhone 16 Plus
+IOS_PLATFORM_VERSION=18.0
+```
+
+The Appium server must be running before `npm run test:mobile:ios`.
+
 The start script runs PostgreSQL and Kafka with Apple `container`, publishes them on localhost, and the test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
 
 Default Apple Containers endpoints:
@@ -55,6 +80,11 @@ KAFKA_PORT=9092
 KAFKA_BROKERS=127.0.0.1:9092
 JUICE_SHOP_PORT=3000
 UI_APP_URL=http://127.0.0.1:3000
+MOBILE_APP_URL=http://127.0.0.1:3000
+APPIUM_HOST=127.0.0.1
+APPIUM_PORT=4723
+IOS_DEVICE_NAME=iPhone 16 Plus
+IOS_PLATFORM_VERSION=18.0
 ```
 
 Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.
@@ -72,7 +102,11 @@ tests/
     postgres.spec.ts
   ui/
     juice-shop.spec.ts
+  mobile/
+    ios-safari/
+      juice-shop.spec.ts
   support/
+    appium.ts
     kafka-container.ts
     postgres-container.ts
     ui-app.ts
@@ -85,6 +119,7 @@ tests/
 - `kafka.spec.ts` starts Kafka in a container, produces a message, and consumes it.
 - `order-pipeline.spec.ts` starts Kafka and PostgreSQL together, consumes an order event from Kafka, and stores it in PostgreSQL.
 - `juice-shop.spec.ts` starts OWASP Juice Shop and checks storefront loading, search, navigation, feedback validation, and invalid login handling.
+- `mobile/ios-safari/juice-shop.spec.ts` drives iOS Safari through Appium and checks Juice Shop storefront and invalid login handling.
 
 ## Notes
 
