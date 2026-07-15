@@ -60,8 +60,9 @@ Useful environment overrides:
 MOBILE_APP_URL=http://127.0.0.1:3000
 APPIUM_HOST=127.0.0.1
 APPIUM_PORT=4723
-IOS_DEVICE_NAME=iPhone 16 Plus
-IOS_PLATFORM_VERSION=18.0
+IOS_DEVICE_NAME=iPhone 17 Pro
+IOS_PLATFORM_VERSION=26.5
+APPIUM_WEBVIEW_CONNECT_TIMEOUT=30000
 ```
 
 The Appium server must be running before `npm run test:mobile:ios`.
@@ -83,8 +84,9 @@ UI_APP_URL=http://127.0.0.1:3000
 MOBILE_APP_URL=http://127.0.0.1:3000
 APPIUM_HOST=127.0.0.1
 APPIUM_PORT=4723
-IOS_DEVICE_NAME=iPhone 16 Plus
-IOS_PLATFORM_VERSION=18.0
+IOS_DEVICE_NAME=iPhone 17 Pro
+IOS_PLATFORM_VERSION=26.5
+APPIUM_WEBVIEW_CONNECT_TIMEOUT=30000
 ```
 
 Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.

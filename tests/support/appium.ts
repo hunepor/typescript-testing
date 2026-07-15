@@ -1,7 +1,8 @@
 const APPIUM_HOST = process.env.APPIUM_HOST ?? "127.0.0.1";
 const APPIUM_PORT = Number(process.env.APPIUM_PORT ?? "4723");
-const IOS_PLATFORM_VERSION = process.env.IOS_PLATFORM_VERSION ?? "18.0";
-const IOS_DEVICE_NAME = process.env.IOS_DEVICE_NAME ?? "iPhone 16 Plus";
+const IOS_PLATFORM_VERSION = process.env.IOS_PLATFORM_VERSION ?? "26.5";
+const IOS_DEVICE_NAME = process.env.IOS_DEVICE_NAME ?? "iPhone 17 Pro";
+const APPIUM_WEBVIEW_CONNECT_TIMEOUT = Number(process.env.APPIUM_WEBVIEW_CONNECT_TIMEOUT ?? "30000");
 const MOBILE_APP_URL = process.env.MOBILE_APP_URL ?? process.env.UI_APP_URL ?? "http://127.0.0.1:3000";
 
 const ELEMENT_KEY = "element-6066-11e4-a52e-4f735466cecf";
@@ -53,6 +54,7 @@ export async function createIosSafariSession(): Promise<AppiumBrowser> {
           "appium:platformVersion": IOS_PLATFORM_VERSION,
           "appium:newCommandTimeout": 120,
           "appium:safariAllowPopups": true,
+          "appium:webviewConnectTimeout": APPIUM_WEBVIEW_CONNECT_TIMEOUT,
           "appium:showXcodeLog": process.env.APPIUM_SHOW_XCODE_LOG === "true",
         },
       },
