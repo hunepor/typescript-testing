@@ -13,6 +13,7 @@ test("stores and reads order events in PostgreSQL testcontainer", async () => {
 
   try {
     await migrateOrderEvents(client);
+    await client.query("TRUNCATE TABLE order_events");
 
     const event: OrderCreatedEvent = {
       id: "order-1001",
@@ -38,6 +39,7 @@ test("runs order event migration more than once", async () => {
   try {
     await migrateOrderEvents(client);
     await migrateOrderEvents(client);
+    await client.query("TRUNCATE TABLE order_events");
 
     const result = await client.query("SELECT to_regclass('public.order_events') AS table_name");
 
@@ -54,6 +56,7 @@ test("updates existing order events by id", async () => {
 
   try {
     await migrateOrderEvents(client);
+    await client.query("TRUNCATE TABLE order_events");
 
     const initialEvent: OrderCreatedEvent = {
       id: "order-1002",
@@ -81,6 +84,7 @@ test("returns null when an order event does not exist", async () => {
 
   try {
     await migrateOrderEvents(client);
+    await client.query("TRUNCATE TABLE order_events");
 
     await expect(findOrderEvent(client, "missing-order")).resolves.toBeNull();
   } finally {

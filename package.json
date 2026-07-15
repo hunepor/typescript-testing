@@ -7,6 +7,9 @@
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "test:integration": "playwright test tests/integration",
+    "test:integration:apple": "TEST_RUNTIME=apple-containers playwright test tests/integration",
+    "containers:apple:start": "sh scripts/apple-containers/start.sh",
+    "containers:apple:stop": "sh scripts/apple-containers/stop.sh",
     "test:headed": "playwright test --headed"
   },
   "keywords": [],

@@ -4,18 +4,63 @@ import { KafkaJS } from "@confluentinc/kafka-javascript";
 const KAFKA_IMAGE = "confluentinc/cp-kafka:7.5.0";
 const KAFKA_PORT = 9093;
 
-export async function startKafkaContainer(): Promise<StartedKafkaContainer> {
-  return new KafkaContainer(KAFKA_IMAGE).withKraft().start();
+export type TestKafkaContainer = {
+  getBootstrapServers(): string[];
+  stop(): Promise<void>;
+};
+
+function isAppleContainersRuntime(): boolean {
+  return process.env.TEST_RUNTIME === "apple-containers";
 }
 
-export function createKafkaClient(container: StartedKafkaContainer, clientId: string): KafkaJS.Kafka {
+function createTestcontainersKafkaContainer(container: StartedKafkaContainer): TestKafkaContainer {
+  return {
+    getBootstrapServers: () => [`${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`],
+    stop: async () => {
+      await container.stop();
+    },
+  };
+}
+
+function createAppleKafkaContainer(): TestKafkaContainer {
+  return {
+    getBootstrapServers: () => (process.env.KAFKA_BROKERS ?? "127.0.0.1:9092").split(","),
+    stop: async () => {
+      // Apple Containers are managed by scripts/apple-containers/*.sh in this mode.
+    },
+  };
+}
+
+export async function startKafkaContainer(): Promise<TestKafkaContainer> {
+  if (isAppleContainersRuntime()) {
+    return createAppleKafkaContainer();
+  }
+
+  const container = await new KafkaContainer(KAFKA_IMAGE).withKraft().start();
+  return createTestcontainersKafkaContainer(container);
+}
+
+export function createKafkaClient(container: TestKafkaContainer, clientId: string): KafkaJS.Kafka {
   return new KafkaJS.Kafka({
     kafkaJS: {
-      brokers: [`${container.getHost()}:${container.getMappedPort(KAFKA_PORT)}`],
+      brokers: container.getBootstrapServers(),
       clientId,
       logLevel: KafkaJS.logLevel.ERROR,
     },
   });
+}
+
+export async function createKafkaTopic(kafka: KafkaJS.Kafka, topic: string): Promise<void> {
+  const admin = kafka.admin();
+
+  await admin.connect();
+  try {
+    await admin.createTopics({
+      topics: [{ topic, numPartitions: 1, replicationFactor: 1 }],
+    });
+  } finally {
+    await admin.disconnect();
+  }
 }
 
 export function uniqueTopic(prefix: string): string {

@@ -12,7 +12,7 @@ Project skeleton for integration test automation with:
 
 - Node.js 22+
 - npm
-- Docker Desktop or another Docker-compatible runtime available to Testcontainers
+- Docker Desktop or another Docker-compatible runtime available to Testcontainers, or Apple Containers on macOS
 
 ## Commands
 
@@ -21,6 +21,31 @@ npm run typecheck
 npm test
 npm run test:integration
 ```
+
+## Apple Containers
+
+Apple `container` is not a Docker-compatible Testcontainers backend. For Macs that use Apple Containers instead of Docker, this project supports a separate external dependency mode:
+
+```bash
+npm run containers:apple:start
+npm run test:integration:apple
+npm run containers:apple:stop
+```
+
+The start script runs PostgreSQL and Kafka with Apple `container`, publishes them on localhost, and the test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
+
+Default Apple Containers endpoints:
+
+```text
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5432
+POSTGRES_DB=automation
+POSTGRES_USER=automation
+POSTGRES_PASSWORD=automation
+KAFKA_BROKERS=127.0.0.1:9092
+```
+
+Override these values in the shell when needed. See `.env.apple-containers.example` for the full set.
 
 ## Structure
 
@@ -47,9 +72,9 @@ tests/
 
 ## Notes
 
-The first full test run can take longer because Docker needs to download:
+The first full test run can take longer because the selected container runtime needs to download:
 
 - `postgres:16-alpine`
 - `confluentinc/cp-kafka:7.5.0`
 
-If tests fail with `Could not find a working container runtime strategy`, start Docker Desktop or expose a Docker-compatible socket before running the suite.
+If `npm run test:integration` fails with `Could not find a working container runtime strategy`, use a Docker-compatible runtime or switch to the Apple Containers flow above.

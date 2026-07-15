@@ -6,7 +6,7 @@ import {
   saveOrderCreatedEvent,
   type OrderCreatedEvent,
 } from "../../src/orders/order-events.js";
-import { startKafkaContainer, createKafkaClient, uniqueTopic } from "../support/kafka-container.js";
+import { startKafkaContainer, createKafkaClient, createKafkaTopic, uniqueTopic } from "../support/kafka-container.js";
 import { createPostgresClient, startPostgresContainer } from "../support/postgres-container.js";
 import { waitFor } from "../support/wait.js";
 
@@ -35,8 +35,10 @@ test("moves an order-created event from Kafka into PostgreSQL", async () => {
 
   try {
     await migrateOrderEvents(pgClient);
+    await pgClient.query("TRUNCATE TABLE order_events");
     await producer.connect();
     await consumer.connect();
+    await createKafkaTopic(kafka, topic);
     await consumer.subscribe({ topic });
 
     await consumer.run({
@@ -82,8 +84,10 @@ test("moves multiple order-created events from Kafka into PostgreSQL", async () 
 
   try {
     await migrateOrderEvents(pgClient);
+    await pgClient.query("TRUNCATE TABLE order_events");
     await producer.connect();
     await consumer.connect();
+    await createKafkaTopic(kafka, topic);
     await consumer.subscribe({ topic });
 
     await consumer.run({
@@ -137,8 +141,10 @@ test("ignores empty Kafka order messages", async () => {
 
   try {
     await migrateOrderEvents(pgClient);
+    await pgClient.query("TRUNCATE TABLE order_events");
     await producer.connect();
     await consumer.connect();
+    await createKafkaTopic(kafka, topic);
     await consumer.subscribe({ topic });
 
     await consumer.run({
@@ -180,8 +186,10 @@ test("updates PostgreSQL when Kafka receives the same order id again", async () 
 
   try {
     await migrateOrderEvents(pgClient);
+    await pgClient.query("TRUNCATE TABLE order_events");
     await producer.connect();
     await consumer.connect();
+    await createKafkaTopic(kafka, topic);
     await consumer.subscribe({ topic });
 
     await consumer.run({

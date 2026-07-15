@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { KafkaJS } from "@confluentinc/kafka-javascript";
-import { startKafkaContainer, createKafkaClient, uniqueTopic } from "../support/kafka-container.js";
+import { startKafkaContainer, createKafkaClient, createKafkaTopic, uniqueTopic } from "../support/kafka-container.js";
 import { waitFor } from "../support/wait.js";
 
 type ConsumedMessage = {
@@ -55,6 +55,7 @@ test("produces and consumes a Kafka message with testcontainers", async () => {
   try {
     await producer.connect();
     await consumer.connect();
+    await createKafkaTopic(kafka, topic);
     await consumer.subscribe({ topic });
 
     const consumed = new Promise<string>((resolve) => {
@@ -87,6 +88,7 @@ test("preserves Kafka message key and value", async () => {
 
   try {
     await producer.connect();
+    await createKafkaTopic(kafka, topic);
     await producer.send({
       topic,
       messages: [{ key: "order-1002", value: JSON.stringify({ status: "paid" }) }],
@@ -115,6 +117,7 @@ test("consumes multiple Kafka messages from the same topic", async () => {
 
   try {
     await producer.connect();
+    await createKafkaTopic(kafka, topic);
     await producer.send({
       topic,
       messages: [
@@ -149,6 +152,7 @@ test("allows independent consumer groups to read the same Kafka message", async 
 
   try {
     await producer.connect();
+    await createKafkaTopic(kafka, topic);
     await producer.send({
       topic,
       messages: [{ key: "order-1005", value: JSON.stringify({ status: "created" }) }],
