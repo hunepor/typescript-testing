@@ -12,6 +12,7 @@
     "test:ui:apple": "TEST_RUNTIME=apple-containers UI_APP_URL=${UI_APP_URL:-http://127.0.0.1:${JUICE_SHOP_PORT:-3000}} playwright test tests/ui",
     "test:mobile:ios": "playwright test tests/mobile/ios-safari",
     "test:mobile:ios:native": "playwright test tests/mobile/ios-native",
+    "test:mobile:ios:wdio": "playwright test tests/mobile/ios-native/settings-wdio.spec.ts",
     "appium:server": "appium --base-path /",
     "appium:driver:list": "appium driver list --installed",
     "appium:driver:install:xcuitest": "appium driver install xcuitest",
@@ -34,7 +35,8 @@
     "appium": "^3.5.2",
     "appium-xcuitest-driver": "^11.17.7",
     "testcontainers": "^12.0.4",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "webdriverio": "^9.29.1"
   },
   "dependencies": {
     "@confluentinc/kafka-javascript": "^1.10.0",
