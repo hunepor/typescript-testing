@@ -42,10 +42,11 @@ POSTGRES_PORT=5432
 POSTGRES_DB=automation
 POSTGRES_USER=automation
 POSTGRES_PASSWORD=automation
+KAFKA_PORT=9092
 KAFKA_BROKERS=127.0.0.1:9092
 ```
 
-Override these values in the shell when needed. See `.env.apple-containers.example` for the full set.
+Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.
 
 ## Structure
 

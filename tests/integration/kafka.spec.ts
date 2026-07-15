@@ -54,8 +54,8 @@ test("produces and consumes a Kafka message with testcontainers", async () => {
 
   try {
     await producer.connect();
-    await consumer.connect();
     await createKafkaTopic(kafka, topic);
+    await consumer.connect();
     await consumer.subscribe({ topic });
 
     const consumed = new Promise<string>((resolve) => {

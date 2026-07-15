@@ -10,7 +10,9 @@ POSTGRES_USER="${POSTGRES_USER:-automation}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-automation}"
 
 KAFKA_PORT="${KAFKA_PORT:-9092}"
+KAFKA_BROKERS="${KAFKA_BROKERS:-127.0.0.1:$KAFKA_PORT}"
 KAFKA_CLUSTER_ID="${KAFKA_CLUSTER_ID:-MkU3OEVBNTcwNTJENDM2Qk}"
+KAFKA_INTERNAL_PORT="9092"
 
 require_container_cli() {
   if ! command -v container >/dev/null 2>&1; then
@@ -52,7 +54,7 @@ wait_for_postgres() {
 wait_for_kafka() {
   attempts=90
   while [ "$attempts" -gt 0 ]; do
-    if container exec "$KAFKA_NAME" kafka-topics --bootstrap-server "127.0.0.1:$KAFKA_PORT" --list >/dev/null 2>&1; then
+    if container logs "$KAFKA_NAME" 2>/dev/null | grep -q "Kafka Server started"; then
       echo "Kafka is ready on 127.0.0.1:$KAFKA_PORT"
       return 0
     fi
@@ -82,13 +84,13 @@ container run -d \
 
 container run -d \
   --name "$KAFKA_NAME" \
-  -p "127.0.0.1:$KAFKA_PORT:9092" \
+  -p "127.0.0.1:$KAFKA_PORT:$KAFKA_INTERNAL_PORT" \
   -e "KAFKA_NODE_ID=1" \
   -e "CLUSTER_ID=$KAFKA_CLUSTER_ID" \
   -e "KAFKA_PROCESS_ROLES=broker,controller" \
   -e "KAFKA_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:29093" \
-  -e "KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093" \
-  -e "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:$KAFKA_PORT" \
+  -e "KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:$KAFKA_INTERNAL_PORT,CONTROLLER://0.0.0.0:29093" \
+  -e "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$KAFKA_BROKERS" \
   -e "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER" \
   -e "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT" \
   -e "KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT" \
@@ -114,5 +116,5 @@ Environment:
   POSTGRES_DB=$POSTGRES_DB
   POSTGRES_USER=$POSTGRES_USER
   POSTGRES_PASSWORD=$POSTGRES_PASSWORD
-  KAFKA_BROKERS=127.0.0.1:$KAFKA_PORT
+  KAFKA_BROKERS=$KAFKA_BROKERS
 EOF
