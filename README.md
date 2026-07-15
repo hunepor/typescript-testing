@@ -20,6 +20,7 @@ Project skeleton for integration test automation with:
 npm run typecheck
 npm test
 npm run test:integration
+npm run test:ui
 ```
 
 ## Apple Containers
@@ -30,6 +31,14 @@ Apple `container` is not a Docker-compatible Testcontainers backend. For Macs th
 npm run containers:apple:start
 npm run test:integration:apple
 npm run containers:apple:stop
+```
+
+For UI tests against OWASP Juice Shop:
+
+```bash
+npm run containers:apple:start:ui
+npm run test:ui:apple
+npm run containers:apple:stop:ui
 ```
 
 The start script runs PostgreSQL and Kafka with Apple `container`, publishes them on localhost, and the test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
@@ -44,6 +53,8 @@ POSTGRES_USER=automation
 POSTGRES_PASSWORD=automation
 KAFKA_PORT=9092
 KAFKA_BROKERS=127.0.0.1:9092
+JUICE_SHOP_PORT=3000
+UI_APP_URL=http://127.0.0.1:3000
 ```
 
 Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.
@@ -59,9 +70,12 @@ tests/
     kafka.spec.ts
     order-pipeline.spec.ts
     postgres.spec.ts
+  ui/
+    juice-shop.spec.ts
   support/
     kafka-container.ts
     postgres-container.ts
+    ui-app.ts
     wait.ts
 ```
 
@@ -70,6 +84,7 @@ tests/
 - `postgres.spec.ts` starts PostgreSQL in a container, migrates a table, writes an order event, and reads it back.
 - `kafka.spec.ts` starts Kafka in a container, produces a message, and consumes it.
 - `order-pipeline.spec.ts` starts Kafka and PostgreSQL together, consumes an order event from Kafka, and stores it in PostgreSQL.
+- `juice-shop.spec.ts` starts OWASP Juice Shop and checks storefront loading, search, navigation, feedback validation, and invalid login handling.
 
 ## Notes
 
@@ -77,5 +92,6 @@ The first full test run can take longer because the selected container runtime n
 
 - `postgres:16-alpine`
 - `confluentinc/cp-kafka:7.5.0`
+- `bkimminich/juice-shop:v17.3.0`
 
 If `npm run test:integration` fails with `Could not find a working container runtime strategy`, use a Docker-compatible runtime or switch to the Apple Containers flow above.
