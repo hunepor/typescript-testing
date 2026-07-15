@@ -11,6 +11,7 @@
     "test:ui": "playwright test tests/ui",
     "test:ui:apple": "TEST_RUNTIME=apple-containers UI_APP_URL=${UI_APP_URL:-http://127.0.0.1:${JUICE_SHOP_PORT:-3000}} playwright test tests/ui",
     "test:mobile:ios": "playwright test tests/mobile/ios-safari",
+    "test:mobile:ios:native": "playwright test tests/mobile/ios-native",
     "appium:server": "appium --base-path /",
     "appium:driver:list": "appium driver list --installed",
     "appium:driver:install:xcuitest": "appium driver install xcuitest",

@@ -52,6 +52,13 @@ npm run appium:server
 npm run test:mobile:ios
 ```
 
+Native iOS app smoke tests use the same Appium server and launch the Settings app by default:
+
+```bash
+npm run appium:server
+npm run test:mobile:ios:native
+```
+
 Xcode must have the iOS platform installed for the active Xcode version. If WebDriverAgent fails with `iOS <version> is not installed`, open Xcode > Settings > Components and install the missing iOS platform.
 
 Useful environment overrides:
@@ -63,9 +70,10 @@ APPIUM_PORT=4723
 IOS_DEVICE_NAME=iPhone 17 Pro
 IOS_PLATFORM_VERSION=26.5
 APPIUM_WEBVIEW_CONNECT_TIMEOUT=30000
+IOS_NATIVE_APP_BUNDLE_ID=com.apple.Preferences
 ```
 
-The Appium server must be running before `npm run test:mobile:ios`.
+The Appium server must be running before `npm run test:mobile:ios` or `npm run test:mobile:ios:native`.
 
 The start script runs PostgreSQL and Kafka with Apple `container`, publishes them on localhost, and the test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
 
@@ -87,6 +95,7 @@ APPIUM_PORT=4723
 IOS_DEVICE_NAME=iPhone 17 Pro
 IOS_PLATFORM_VERSION=26.5
 APPIUM_WEBVIEW_CONNECT_TIMEOUT=30000
+IOS_NATIVE_APP_BUNDLE_ID=com.apple.Preferences
 ```
 
 Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.
@@ -105,6 +114,8 @@ tests/
   ui/
     juice-shop.spec.ts
   mobile/
+    ios-native/
+      settings.spec.ts
     ios-safari/
       juice-shop.spec.ts
   support/
@@ -122,6 +133,7 @@ tests/
 - `order-pipeline.spec.ts` starts Kafka and PostgreSQL together, consumes an order event from Kafka, and stores it in PostgreSQL.
 - `juice-shop.spec.ts` starts OWASP Juice Shop and checks storefront loading, search, navigation, feedback validation, and invalid login handling.
 - `mobile/ios-safari/juice-shop.spec.ts` drives iOS Safari through Appium and checks Juice Shop storefront and invalid login handling.
+- `mobile/ios-native/settings.spec.ts` drives the iOS Settings app through Appium, checks that the native app opens successfully, and toggles StandBy off and back on.
 
 ## Notes
 
