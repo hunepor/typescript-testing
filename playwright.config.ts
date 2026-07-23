@@ -8,7 +8,7 @@ export default defineConfig({
   expect: {
     timeout: 10_000,
   },
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [["list"], ["html", { open: "never" }], ["allure-playwright"]],
   use: {
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
