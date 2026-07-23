@@ -30,7 +30,7 @@
     "@playwright/test": "^1.61.1",
     "@testcontainers/kafka": "^12.0.4",
     "@testcontainers/postgresql": "^12.0.4",
-    "@types/node": "^26.1.1",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.20.0",
     "appium": "^3.5.2",
     "appium-xcuitest-driver": "^11.17.7",
@@ -41,5 +41,8 @@
   "dependencies": {
     "@confluentinc/kafka-javascript": "^1.10.0",
     "pg": "^8.22.0"
+  },
+  "allowScripts": {
+    "@confluentinc/kafka-javascript@1.10.0": true
   }
 }

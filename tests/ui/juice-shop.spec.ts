@@ -1,18 +1,26 @@
 import { expect, test, type Page } from "@playwright/test";
 import { startUiApp, type TestUiApp } from "../support/ui-app.js";
 
-let app: TestUiApp;
+let app: TestUiApp | undefined;
 
 test.beforeAll(async () => {
   app = await startUiApp();
 });
 
 test.afterAll(async () => {
-  await app.stop();
+  await app?.stop();
 });
 
+function getBaseUrl(): string {
+  if (!app) {
+    throw new Error("Juice Shop test app was not started");
+  }
+
+  return app.getBaseUrl();
+}
+
 async function openJuiceShop(page: Page): Promise<void> {
-  await page.goto(app.getBaseUrl());
+  await page.goto(getBaseUrl());
   await closeOptionalDialogs(page);
 }
 
@@ -97,7 +105,7 @@ test("opens customer feedback from the side navigation", async ({ page }) => {
 });
 
 test("keeps feedback submit disabled for incomplete captcha validation", async ({ page }) => {
-  await page.goto(`${app.getBaseUrl()}/#/contact`);
+  await page.goto(`${getBaseUrl()}/#/contact`);
   await closeOptionalDialogs(page);
 
   await page.getByLabel("Field for entering the comment or the feedback").fill("Great catalog and smooth checkout.");
@@ -107,7 +115,7 @@ test("keeps feedback submit disabled for incomplete captcha validation", async (
 });
 
 test("shows an error for invalid login", async ({ page }) => {
-  await page.goto(`${app.getBaseUrl()}/#/login`);
+  await page.goto(`${getBaseUrl()}/#/login`);
   await closeOptionalDialogs(page);
 
   await page.getByLabel("Text field for the login email").fill("not-a-user@example.test");
@@ -120,7 +128,7 @@ test("shows an error for invalid login", async ({ page }) => {
 test("registers a new customer account", async ({ page }) => {
   const user = createRegistrationData();
 
-  await page.goto(`${app.getBaseUrl()}/#/register`);
+  await page.goto(`${getBaseUrl()}/#/register`);
   await closeOptionalDialogs(page);
 
   await page.getByLabel("Email address field").fill(user.email);
