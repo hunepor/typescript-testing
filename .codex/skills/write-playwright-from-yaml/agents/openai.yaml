@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Playwright From YAML"
+  short_description: "Generate Playwright tests from YAML cases"
+  default_prompt: "Use $write-playwright-from-yaml to generate or update Playwright tests from nearby YAML test cases."

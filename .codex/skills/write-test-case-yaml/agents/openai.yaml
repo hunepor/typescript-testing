@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Test Case YAML"
+  short_description: "Create structured YAML test cases"
+  default_prompt: "Use $write-test-case-yaml to create a human-readable YAML test case beside the relevant tests."

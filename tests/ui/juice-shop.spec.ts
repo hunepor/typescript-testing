@@ -27,6 +27,47 @@ async function searchFor(page: Page, query: string): Promise<void> {
   await page.keyboard.press("Enter");
 }
 
+function createRegistrationData(): { email: string; password: string; securityAnswer: string } {
+  const uniqueId = Date.now().toString(36);
+
+  return {
+    email: `qa.registration.${uniqueId}@example.test`,
+    password: createValidPassword(),
+    securityAnswer: `answer-${uniqueId}`,
+  };
+}
+
+function createValidPassword(): string {
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const digits = "0123456789";
+  const special = "!@#$%^&*";
+  const allCharacters = lowercase + uppercase + digits + special;
+  const characters = [
+    pickRandomCharacter(lowercase),
+    pickRandomCharacter(uppercase),
+    pickRandomCharacter(digits),
+    pickRandomCharacter(special),
+  ];
+
+  while (characters.length < 12) {
+    characters.push(pickRandomCharacter(allCharacters));
+  }
+
+  return shuffleCharacters(characters).join("");
+}
+
+function pickRandomCharacter(characters: string): string {
+  return characters[Math.floor(Math.random() * characters.length)];
+}
+
+function shuffleCharacters(characters: string[]): string[] {
+  return characters
+    .map((character) => ({ character, sortKey: Math.random() }))
+    .sort((left, right) => left.sortKey - right.sortKey)
+    .map(({ character }) => character);
+}
+
 test("opens the Juice Shop storefront", async ({ page }) => {
   await openJuiceShop(page);
 
@@ -74,4 +115,22 @@ test("shows an error for invalid login", async ({ page }) => {
   await page.getByLabel("Login", { exact: true }).click();
 
   await expect(page.getByText("Invalid email or password.")).toBeVisible();
+});
+
+test("registers a new customer account", async ({ page }) => {
+  const user = createRegistrationData();
+
+  await page.goto(`${app.getBaseUrl()}/#/register`);
+  await closeOptionalDialogs(page);
+
+  await page.getByLabel("Email address field").fill(user.email);
+  await page.getByLabel("Field for the password").fill(user.password);
+  await page.getByLabel("Field to confirm the password").fill(user.password);
+  await page.getByLabel("Selection list for the security question").click();
+  await page.getByRole("option", { name: "Your favorite book?" }).click();
+  await page.getByLabel("Field for the answer to the security question").fill(user.securityAnswer);
+  await page.getByLabel("Button to complete the registration").click();
+
+  await expect(page).toHaveURL(/#\/login/);
+  await expect(page.getByText("Registration completed successfully. You can now log in.")).toBeVisible();
 });

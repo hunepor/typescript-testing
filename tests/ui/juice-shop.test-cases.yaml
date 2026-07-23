@@ -1,0 +1,49 @@
+suite:
+  id: UI-JUICE-SHOP
+  title: Juice Shop UI
+  area: ui
+  feature: Account registration
+  priority: high
+  automationFile: juice-shop.spec.ts
+
+testCases:
+  - id: UI-JUICE-SHOP-REGISTRATION-001
+    title: Успешная регистрация нового пользователя
+    priority: high
+    type: positive
+    tags:
+      - auth
+      - registration
+
+    story:
+      asA: новый пользователь магазина
+      iWant: зарегистрировать аккаунт с валидными данными
+      soThat: я мог перейти к входу в систему после создания аккаунта
+
+    preconditions:
+      - Открыт OWASP Juice Shop
+      - Пользователь не авторизован
+      - Email для регистрации еще не используется
+
+    steps:
+      - Открыть страницу регистрации
+      - Ввести уникальный email в домене example.test
+      - Ввести случайный валидный пароль, который соответствует требованиям сложности:
+          - длина от 8 до 40 символов
+          - содержит хотя бы одну строчную букву
+          - содержит хотя бы одну заглавную букву
+          - содержит хотя бы одну цифру
+          - содержит хотя бы один спецсимвол
+      - Повторить этот же пароль
+      - Выбрать security question: Your favorite book?
+      - Ввести ответ на security question
+      - Нажать кнопку Register
+
+    expectedResult:
+      - Кнопка Register становится доступной после заполнения всех обязательных полей валидными данными
+      - Пользователь перенаправлен на страницу Login
+      - Появляется сообщение: Registration completed successfully. You can now log in.
+
+    automation:
+      status: automated
+      testName: registers a new customer account
