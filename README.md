@@ -1,10 +1,10 @@
-# TypeScript Testcontainers Automation
+# TypeScript Test Automation
 
 Project skeleton for TypeScript test automation with:
 
 - TypeScript 7
 - Playwright Test 1.61
-- Testcontainers for Node.js 12
+- Optional Testcontainers for Node.js 12
 - PostgreSQL
 - Kafka
 - OWASP Juice Shop UI tests
@@ -14,10 +14,14 @@ Project skeleton for TypeScript test automation with:
 
 - Node.js 24.18.0 or another Node.js 24+ runtime
 - npm
-- Docker Desktop or another Docker-compatible runtime available to Testcontainers, or Apple Containers on macOS
+- Running PostgreSQL, Kafka, and OWASP Juice Shop services for the default integration and UI tests
+- Docker Desktop or another Docker-compatible runtime available to Testcontainers only when using the optional container commands
+- Apple Containers on macOS only when using the Apple Containers helper scripts
 - Xcode with the required iOS platform installed for Appium iOS tests
 
 ## Commands
+
+Default commands connect to already running services and do not create containers:
 
 ```bash
 npm run typecheck
@@ -29,6 +33,25 @@ npm run test:mobile:ios:native
 npm run test:mobile:ios:wdio
 ```
 
+Optional Testcontainers commands create Docker-compatible containers from the test process:
+
+```bash
+npm run test:integration:container
+npm run test:ui:container
+```
+
+Playwright projects split the suite by area:
+
+```bash
+npx playwright test --project integration
+npx playwright test --project ui-registration
+npx playwright test --project ui
+npx playwright test --project mobile-ios-safari
+npx playwright test --project mobile-ios-native
+```
+
+The `ui-registration`, `mobile-ios-safari`, and `mobile-ios-native` projects run with one worker.
+
 Useful Appium commands:
 
 ```bash
@@ -39,13 +62,13 @@ npm run appium:server
 
 ## Apple Containers
 
-Apple `container` is not a Docker-compatible Testcontainers backend. For Macs that use Apple Containers instead of Docker, this project supports a separate external dependency mode.
+Apple `container` is not a Docker-compatible Testcontainers backend. For Macs that use Apple Containers instead of Docker, start the dependencies with the helper scripts, then use the default test commands.
 
 For PostgreSQL and Kafka integration tests:
 
 ```bash
 npm run containers:apple:start
-npm run test:integration:apple
+npm run test:integration
 npm run containers:apple:stop
 ```
 
@@ -53,13 +76,17 @@ For UI tests against OWASP Juice Shop:
 
 ```bash
 npm run containers:apple:start:ui
-npm run test:ui:apple
+npm run test:ui
 npm run containers:apple:stop:ui
 ```
 
-The start scripts publish services on localhost, and the test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
+Playwright runs `juice-shop-registration.spec.ts` in the one-worker `ui-registration` project, while the remaining Juice Shop UI specs run in the `ui` project.
 
-Default Apple Containers endpoints:
+The `test:*:apple` aliases are kept for convenience when you want the command to fill Apple Containers localhost defaults from `KAFKA_PORT` or `JUICE_SHOP_PORT`.
+
+The start scripts publish services on localhost, and the default test helpers connect through environment variables instead of asking Testcontainers to create containers per test.
+
+Default external service endpoints:
 
 ```text
 POSTGRES_HOST=127.0.0.1
@@ -80,7 +107,7 @@ APPIUM_WEBVIEW_CONNECT_TIMEOUT=30000
 IOS_NATIVE_APP_BUNDLE_ID=com.apple.Preferences
 ```
 
-Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` and is what the tests use. See `.env.apple-containers.example` for the full set.
+Override these values in the shell when needed. `KAFKA_PORT` controls the published localhost port for Apple Containers; `KAFKA_BROKERS` defaults to `127.0.0.1:$KAFKA_PORT` in the Apple-specific alias and is what the tests use. See `.env.apple-containers.example` for the full set.
 
 ## Appium iOS Safari
 
@@ -158,6 +185,8 @@ tests/
     postgres.spec.ts
   ui/
     juice-shop.spec.ts
+    juice-shop-registration.spec.ts
+    juice-shop.spec.ts-snapshots/
     juice-shop.test-cases.yaml
   mobile/
     ios-native/
@@ -176,20 +205,21 @@ tests/
 
 ## What The Tests Cover
 
-- `postgres.spec.ts` starts PostgreSQL in a container, migrates a table, writes an order event, and reads it back.
-- `kafka.spec.ts` starts Kafka in a container, produces a message, and consumes it.
-- `order-pipeline.spec.ts` starts Kafka and PostgreSQL together, consumes an order event from Kafka, and stores it in PostgreSQL.
-- `ui/juice-shop.spec.ts` starts OWASP Juice Shop and checks storefront loading, search, navigation, feedback validation, invalid login handling, and new user registration.
+- `postgres.spec.ts` connects to PostgreSQL, migrates a table, writes an order event, and reads it back.
+- `kafka.spec.ts` connects to Kafka, produces a message, and consumes it.
+- `order-pipeline.spec.ts` connects to Kafka and PostgreSQL together, consumes an order event from Kafka, and stores it in PostgreSQL.
+- `ui/juice-shop.spec.ts` connects to OWASP Juice Shop and checks storefront loading, search, navigation, feedback validation, invalid login handling, and product reviews.
+- `ui/juice-shop-registration.spec.ts` checks new user registration in a one-worker Playwright project.
 - `mobile/ios-safari/juice-shop.spec.ts` drives iOS Safari through Appium and checks Juice Shop storefront and invalid login handling.
 - `mobile/ios-native/settings.spec.ts` drives the iOS Settings app through Appium helpers, checks that the native app opens successfully, and toggles StandBy off and back on.
 - `mobile/ios-native/settings-wdio.spec.ts` drives the iOS Settings app through WebDriverIO and checks the native smoke flow.
 
 ## Notes
 
-The first full test run can take longer because the selected container runtime needs to download:
+The first optional container test run can take longer because the selected container runtime needs to download:
 
 - `postgres:16-alpine`
 - `confluentinc/cp-kafka:7.5.0`
 - `bkimminich/juice-shop:v17.3.0`
 
-If `npm run test:integration` fails with `Could not find a working container runtime strategy`, use a Docker-compatible runtime or switch to the Apple Containers flow above.
+If `npm run test:integration:container` fails with `Could not find a working container runtime strategy`, use a Docker-compatible runtime or switch to the default external dependency flow above.

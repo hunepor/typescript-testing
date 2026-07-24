@@ -4,7 +4,7 @@ suite:
   area: ui
   feature: Account registration
   priority: high
-  automationFile: juice-shop.spec.ts
+  automationFile: juice-shop-registration.spec.ts
 
 testCases:
   - id: UI-JUICE-SHOP-REGISTRATION-001
