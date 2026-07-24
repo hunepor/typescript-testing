@@ -50,7 +50,7 @@ npx playwright test --project mobile-ios-safari
 npx playwright test --project mobile-ios-native
 ```
 
-The `ui-registration`, `mobile-ios-safari`, and `mobile-ios-native` projects run with one worker.
+The `integration`, `ui-registration`, `mobile-ios-safari`, and `mobile-ios-native` projects run with one worker.
 
 Useful Appium commands:
 

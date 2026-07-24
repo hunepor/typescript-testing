@@ -23,6 +23,7 @@ export default defineConfig({
     {
       name: "integration",
       testMatch: integrationSpecPattern,
+      workers: 1,
     },
     {
       name: "ui-registration",
