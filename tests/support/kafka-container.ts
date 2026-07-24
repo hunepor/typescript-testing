@@ -9,8 +9,8 @@ export type TestKafkaContainer = {
   stop(): Promise<void>;
 };
 
-function isAppleContainersRuntime(): boolean {
-  return process.env.TEST_RUNTIME === "apple-containers";
+function isTestcontainersRuntime(): boolean {
+  return process.env.TEST_RUNTIME === "testcontainers";
 }
 
 function createTestcontainersKafkaContainer(container: StartedKafkaContainer): TestKafkaContainer {
@@ -22,22 +22,22 @@ function createTestcontainersKafkaContainer(container: StartedKafkaContainer): T
   };
 }
 
-function createAppleKafkaContainer(): TestKafkaContainer {
+function createExternalKafkaContainer(): TestKafkaContainer {
   return {
     getBootstrapServers: () => (process.env.KAFKA_BROKERS ?? "127.0.0.1:9092").split(","),
     stop: async () => {
-      // Apple Containers are managed by scripts/apple-containers/*.sh in this mode.
+      // External dependencies are managed outside the test process in this mode.
     },
   };
 }
 
 export async function startKafkaContainer(): Promise<TestKafkaContainer> {
-  if (isAppleContainersRuntime()) {
-    return createAppleKafkaContainer();
+  if (isTestcontainersRuntime()) {
+    const container = await new KafkaContainer(KAFKA_IMAGE).withKraft().start();
+    return createTestcontainersKafkaContainer(container);
   }
 
-  const container = await new KafkaContainer(KAFKA_IMAGE).withKraft().start();
-  return createTestcontainersKafkaContainer(container);
+  return createExternalKafkaContainer();
 }
 
 export function createKafkaClient(container: TestKafkaContainer, clientId: string): KafkaJS.Kafka {

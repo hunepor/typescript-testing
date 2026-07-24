@@ -7,7 +7,7 @@ import {
 } from "../../src/orders/order-events.js";
 import { createPostgresClient, startPostgresContainer } from "../support/postgres-container.js";
 
-test("stores and reads order events in PostgreSQL testcontainer", async () => {
+test("stores and reads order events in PostgreSQL", async () => {
   const container = await startPostgresContainer();
   const client = await createPostgresClient(container);
 

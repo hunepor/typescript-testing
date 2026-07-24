@@ -108,7 +108,7 @@ cat <<EOF
 Apple Containers test dependencies are running.
 
 Use:
-  TEST_RUNTIME=apple-containers npm run test:integration
+  npm run test:integration
 
 Environment:
   POSTGRES_HOST=127.0.0.1

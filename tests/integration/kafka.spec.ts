@@ -40,7 +40,7 @@ async function consumeMessages(
   return { consumer, messages };
 }
 
-test("produces and consumes a Kafka message with testcontainers", async () => {
+test("produces and consumes a Kafka message", async () => {
   const container = await startKafkaContainer();
   const kafka = createKafkaClient(container, "automation-tests");
   const topic = uniqueTopic("orders");
