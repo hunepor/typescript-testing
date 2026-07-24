@@ -8,15 +8,15 @@ export type TestUiApp = {
   stop(): Promise<void>;
 };
 
-function isAppleContainersRuntime(): boolean {
-  return process.env.TEST_RUNTIME === "apple-containers";
+function isTestcontainersRuntime(): boolean {
+  return process.env.TEST_RUNTIME === "testcontainers";
 }
 
-function createAppleUiApp(): TestUiApp {
+function createExternalUiApp(): TestUiApp {
   return {
     getBaseUrl: () => process.env.UI_APP_URL ?? `http://127.0.0.1:${process.env.JUICE_SHOP_PORT ?? "3000"}`,
     stop: async () => {
-      // Apple Containers are managed by scripts/apple-containers/*-ui.sh in this mode.
+      // External dependencies are managed outside the test process in this mode.
     },
   };
 }
@@ -31,14 +31,14 @@ function createTestcontainersUiApp(container: StartedTestContainer): TestUiApp {
 }
 
 export async function startUiApp(): Promise<TestUiApp> {
-  if (isAppleContainersRuntime()) {
-    return createAppleUiApp();
+  if (isTestcontainersRuntime()) {
+    const container = await new GenericContainer(JUICE_SHOP_IMAGE)
+      .withExposedPorts(JUICE_SHOP_PORT)
+      .withWaitStrategy(Wait.forHttp("/", JUICE_SHOP_PORT).withStartupTimeout(120_000))
+      .start();
+
+    return createTestcontainersUiApp(container);
   }
 
-  const container = await new GenericContainer(JUICE_SHOP_IMAGE)
-    .withExposedPorts(JUICE_SHOP_PORT)
-    .withWaitStrategy(Wait.forHttp("/", JUICE_SHOP_PORT).withStartupTimeout(120_000))
-    .start();
-
-  return createTestcontainersUiApp(container);
+  return createExternalUiApp();
 }

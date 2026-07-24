@@ -8,11 +8,11 @@ export type TestPostgresContainer = {
   stop(): Promise<void>;
 };
 
-function isAppleContainersRuntime(): boolean {
-  return process.env.TEST_RUNTIME === "apple-containers";
+function isTestcontainersRuntime(): boolean {
+  return process.env.TEST_RUNTIME === "testcontainers";
 }
 
-function createApplePostgresContainer(): TestPostgresContainer {
+function createExternalPostgresContainer(): TestPostgresContainer {
   const host = process.env.POSTGRES_HOST ?? "127.0.0.1";
   const port = process.env.POSTGRES_PORT ?? "5432";
   const database = process.env.POSTGRES_DB ?? "automation";
@@ -22,7 +22,7 @@ function createApplePostgresContainer(): TestPostgresContainer {
   return {
     getConnectionUri: () => `postgresql://${username}:${password}@${host}:${port}/${database}`,
     stop: async () => {
-      // Apple Containers are managed by scripts/apple-containers/*.sh in this mode.
+      // External dependencies are managed outside the test process in this mode.
     },
   };
 }
@@ -37,17 +37,17 @@ function createTestcontainersPostgresContainer(container: StartedPostgreSqlConta
 }
 
 export async function startPostgresContainer(): Promise<TestPostgresContainer> {
-  if (isAppleContainersRuntime()) {
-    return createApplePostgresContainer();
+  if (isTestcontainersRuntime()) {
+    const container = await new PostgreSqlContainer(POSTGRES_IMAGE)
+      .withDatabase("automation")
+      .withUsername("automation")
+      .withPassword("automation")
+      .start();
+
+    return createTestcontainersPostgresContainer(container);
   }
 
-  const container = await new PostgreSqlContainer(POSTGRES_IMAGE)
-    .withDatabase("automation")
-    .withUsername("automation")
-    .withPassword("automation")
-    .start();
-
-  return createTestcontainersPostgresContainer(container);
+  return createExternalPostgresContainer();
 }
 
 export async function createPostgresClient(container: Pick<StartedPostgreSqlContainer, "getConnectionUri">): Promise<Client> {

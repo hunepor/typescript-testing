@@ -57,7 +57,7 @@ cat <<EOF
 Juice Shop UI test app is running.
 
 Use:
-  npm run test:ui:apple
+  npm run test:ui
 
 Environment:
   UI_APP_URL=http://127.0.0.1:$JUICE_SHOP_PORT
